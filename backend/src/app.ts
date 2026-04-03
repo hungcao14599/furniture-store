@@ -4,6 +4,7 @@ import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import { env } from "./config/env.js";
+import { setupSwagger } from "./docs/swagger.js";
 import { errorHandler, notFoundHandler } from "./middlewares/error.middleware.js";
 import { apiRouter } from "./routes/index.js";
 
@@ -27,6 +28,7 @@ app.use(morgan("dev"));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(uploadsDirectory));
+setupSwagger(app);
 
 app.get("/health", (_request, response) => {
   response.json({
