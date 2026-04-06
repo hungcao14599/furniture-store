@@ -28,8 +28,13 @@ export const resolveImageUrl = (url?: string | null) => {
     return url;
   }
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-  return `${backendUrl}${url}`;
+  const defaultBackendUrl = import.meta.env.PROD ? "" : "http://localhost:5000";
+  const backendUrl = (import.meta.env.VITE_BACKEND_URL?.trim() || defaultBackendUrl).replace(
+    /\/$/,
+    "",
+  );
+
+  return backendUrl ? `${backendUrl}${url}` : url;
 };
 
 export const resolveZaloUrl = (zalo?: string | null, phone?: string | null) => {

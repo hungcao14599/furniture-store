@@ -21,7 +21,8 @@ const normalizeError = (error: unknown): ApiError => {
   return normalized;
 };
 
-const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const defaultApiUrl = import.meta.env.PROD ? "/api" : "http://localhost:5000/api";
+const apiUrl = (import.meta.env.VITE_API_URL?.trim() || defaultApiUrl).replace(/\/$/, "");
 
 export const publicHttp = axios.create({
   baseURL: apiUrl,
