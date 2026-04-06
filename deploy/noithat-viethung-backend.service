@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/var/www/app/furniture-store/noithat-viethung/backend
-EnvironmentFile=/var/www/app/furniture-store/noithat-viethung/backend/.env
+WorkingDirectory=/var/www/app/furniture-store/backend
+EnvironmentFile=/var/www/app/furniture-store/backend/.env
 # User=www-data
 # Group=www-data
 ExecStart=/usr/bin/npm run start
