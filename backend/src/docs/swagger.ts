@@ -2,18 +2,29 @@ import { Express, Request, Response } from "express";
 import swaggerUi from "swagger-ui-express";
 import { openApiDocument } from "./openapi.js";
 
+const buildOpenApiDocument = (request: Request) => ({
+  ...openApiDocument,
+  servers: [
+    {
+      url: `${request.protocol}://${request.get("host")}`,
+      description: "Current server",
+    },
+  ],
+});
+
 export const setupSwagger = (app: Express) => {
-  app.get("/docs-json", (_request: Request, response: Response) => {
-    response.json(openApiDocument);
+  app.get("/docs-json", (request: Request, response: Response) => {
+    response.json(buildOpenApiDocument(request));
   });
 
   app.use(
     "/docs",
     swaggerUi.serve,
-    swaggerUi.setup(openApiDocument, {
+    swaggerUi.setup(null, {
       explorer: true,
       customSiteTitle: "Lumina Maison API Docs",
       swaggerOptions: {
+        url: "/docs-json",
         persistAuthorization: true,
         docExpansion: "list",
         filter: true,

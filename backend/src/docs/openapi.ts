@@ -1,4 +1,3 @@
-import { env } from "../config/env.js";
 import { ORDER_STATUS_VALUES } from "../constants/order.js";
 
 const ref = (schemaName: string) => ({ $ref: `#/components/schemas/${schemaName}` });
@@ -83,12 +82,6 @@ export const openApiDocument = {
       email: "admin@luminamaison.com",
     },
   },
-  servers: [
-    {
-      url: `http://localhost:${env.PORT}`,
-      description: "Local development server",
-    },
-  ],
   tags: [
     { name: "Health", description: "Kiểm tra trạng thái hoạt động của backend." },
     { name: "Public Categories", description: "Danh mục sản phẩm hiển thị cho người dùng cuối." },

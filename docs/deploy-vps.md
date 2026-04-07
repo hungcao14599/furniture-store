@@ -72,7 +72,37 @@ nginx -v
 
 Neu VPS co firewall hoac security group, nho mo cong `3110`.
 
-## 3. Dua source code len VPS
+## 3. Mo port 3110 tren Google Cloud
+
+Neu VPS cua ban dang chay tren Google Cloud VM va da cau hinh Nginx listen cong `3110`, ban phai mo firewall rule tren Google Cloud thi moi truy cap duoc tu ben ngoai.
+
+Cach mo port bang Google Cloud Console:
+
+1. Vao `https://console.cloud.google.com`
+2. Chon project dang chua VM
+3. Vao `VPC network` -> `Firewall`
+4. Bam `Create Firewall Rule`
+5. Dien cac truong co ban:
+
+- `Name`: `allow-3110`
+- `Network`: chon VPC network dang dung cho VM
+- `Direction of traffic`: `Ingress`
+- `Action on match`: `Allow`
+- `Targets`: `All instances in the network`
+- `Source IPv4 ranges`: `0.0.0.0/0`
+- `Protocols and ports`: tick `Specified protocols and ports`, nhap `tcp:3110`
+
+6. Bam `Create`
+
+Neu ban dung `Targets` theo network tag thay vi `All instances in the network`, hay gan dung tag do cho VM trong phan network settings cua instance.
+
+Sau khi tao firewall rule, co the kiem tra lai:
+
+- VM co external IP
+- Nginx da `listen 3110`
+- firewall rule da allow `tcp:3110`
+
+## 4. Dua source code len VPS
 
 Tao thu muc chua source:
 
@@ -102,7 +132,7 @@ npm ci
 
 Vi repo dang dung `workspaces`, `npm ci` o root se cai package cho ca `backend` va `frontend`.
 
-## 4. Cau hinh backend
+## 5. Cau hinh backend
 
 Tao file env cho backend:
 
@@ -129,7 +159,7 @@ mkdir -p /var/www/app/furniture-store/backend/uploads
 
 Neu tat ca anh deu luu tren Supabase, bo qua buoc nay.
 
-## 5. Cau hinh frontend
+## 6. Cau hinh frontend
 
 Tao file env cho frontend:
 
@@ -151,7 +181,7 @@ Y nghia:
 
 Neu ban van dung mo hinh nay thi thuong khong can sua `frontend/.env.production`.
 
-## 6. Build backend va frontend
+## 7. Build backend va frontend
 
 Chay generate Prisma cho backend:
 
@@ -185,7 +215,7 @@ Neu can seed du lieu lan dau:
 npm run prisma:seed --workspace backend
 ```
 
-## 7. Chay backend bang systemd
+## 8. Chay backend bang systemd
 
 Copy file service mau:
 
@@ -228,7 +258,7 @@ Kiem tra backend noi bo:
 curl http://127.0.0.1:5000/health
 ```
 
-## 8. Chay frontend bang Nginx
+## 9. Chay frontend bang Nginx
 
 Copy file Nginx mau:
 
@@ -266,7 +296,7 @@ sudo nginx -t
 sudo systemctl restart nginx
 ```
 
-## 9. Kiem tra sau deploy
+## 10. Kiem tra sau deploy
 
 Kiem tra backend noi bo:
 
@@ -299,7 +329,7 @@ Neu truy cap tren trinh duyet, cac URL can thu la:
 - `http://YOUR_VPS_IP:3110/health`
 - `http://YOUR_VPS_IP:3110/docs`
 
-## 10. Deploy lan dau: tom tat nhanh
+## 11. Deploy lan dau: tom tat nhanh
 
 Neu can mot chuoi lenh ngan gon cho lan deploy dau tien:
 
@@ -320,6 +350,7 @@ cp backend/.env.production.example backend/.env
 cp frontend/.env.production.example frontend/.env.production
 
 # sua backend/.env truoc khi chay tiep
+# neu dung Google Cloud, mo firewall tcp:3110 truoc khi test ngoai Internet
 
 npm run prisma:generate --workspace backend
 npm run prisma:migrate:deploy --workspace backend
@@ -337,7 +368,7 @@ sudo nginx -t
 sudo systemctl restart nginx
 ```
 
-## 11. Update code cho ca backend va frontend
+## 12. Update code cho ca backend va frontend
 
 Moi lan update code:
 
@@ -354,7 +385,7 @@ sudo systemctl restart nginx
 
 Neu lan update do khong co migration moi, co the bo qua `npm run prisma:migrate:deploy --workspace backend`.
 
-## 12. Luu y
+## 13. Luu y
 
 - `FRONTEND_URL` trong `backend/.env` phai khop URL that nguoi dung truy cap.
 - Neu truy cap bang IP va cong `3110`, dat `FRONTEND_URL=http://YOUR_VPS_IP:3110`.
@@ -363,3 +394,4 @@ Neu lan update do khong co migration moi, co the bo qua `npm run prisma:migrate:
 - Upload hien tai dung `multer.memoryStorage()` va day file thang len Supabase Storage, khong can luu local tren VPS.
 - Neu toan bo anh deu o Supabase thi khong can tao `backend/uploads`.
 - `npm run prisma:migrate` khong dung cho production. Tren VPS hay dung `npm run prisma:migrate:deploy --workspace backend`.
+- Neu deploy tren Google Cloud ma truy cap bang IP khong vao duoc, thu kiem tra firewall rule `tcp:3110` truoc khi debug Nginx hay Node.js.

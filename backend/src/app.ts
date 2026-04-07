@@ -10,6 +10,8 @@ import { apiRouter } from "./routes/index.js";
 
 export const app = express();
 
+app.set("trust proxy", 1);
+
 const allowedOrigins = env.FRONTEND_URL.split(",").map((origin) => origin.trim());
 const uploadsDirectory = path.resolve(process.cwd(), "uploads");
 
@@ -22,6 +24,11 @@ app.use(
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        upgradeInsecureRequests: null,
+      },
+    },
   }),
 );
 app.use(morgan("dev"));
