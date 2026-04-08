@@ -93,6 +93,19 @@ export const contactMessageSchema = z.object({
   message: z.string().trim().min(10, "Nội dung tối thiểu 10 ký tự"),
 });
 
+export const chatbotMessageSchema = z.object({
+  message: z.string().trim().min(1, "Tin nhắn không được để trống").max(1500, "Tin nhắn quá dài"),
+  history: z
+    .array(
+      z.object({
+        role: z.enum(["assistant", "user"]),
+        text: z.string().trim().min(1).max(1500),
+      }),
+    )
+    .max(12)
+    .default([]),
+});
+
 export const createOrderSchema = z.object({
   customerName: z.string().trim().min(2, "Họ tên tối thiểu 2 ký tự"),
   phone: z.string().trim().min(8, "Số điện thoại không hợp lệ"),

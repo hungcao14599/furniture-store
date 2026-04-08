@@ -1,4 +1,6 @@
 import {
+  ChatbotHistoryTurn,
+  ChatbotReply,
   Category,
   ContactInfo,
   Post,
@@ -59,6 +61,11 @@ export const publicApi = {
 
   async getContactInfo() {
     const response = await publicHttp.get<{ data: ContactInfo }>("/contact-info");
+    return response.data.data;
+  },
+
+  async createChatbotReply(payload: { message: string; history: ChatbotHistoryTurn[] }) {
+    const response = await publicHttp.post<{ data: ChatbotReply }>("/chatbot", payload);
     return response.data.data;
   },
 

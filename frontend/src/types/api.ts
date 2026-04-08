@@ -120,6 +120,16 @@ export type ContactInfo = {
   introText?: string | null;
 };
 
+export type ChatbotHistoryTurn = {
+  role: "assistant" | "user";
+  text: string;
+};
+
+export type ChatbotReply = {
+  text: string;
+  products: Product[];
+};
+
 export type ContactMessage = {
   id: string;
   name: string;

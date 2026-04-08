@@ -511,7 +511,7 @@ const contactInfo = {
   email: "hello@luminamaison.com",
   address: "86 Nguyen Huu Canh, Ward 22, Binh Thanh District, Ho Chi Minh City",
   facebook: "https://facebook.com/luminamaison",
-  zalo: "https://zalo.me/0901234567",
+  zalo: "https://zalo.me/0968963562",
   instagram: "https://instagram.com/luminamaison",
   mapEmbedUrl: "https://www.google.com/maps?q=86%20Nguyen%20Huu%20Canh%20Binh%20Thanh&output=embed",
   workingHours: "08:30 - 20:00 | Thứ 2 - Chủ nhật",

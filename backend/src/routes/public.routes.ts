@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { createChatbotReply } from "../controllers/chatbot.controller.js";
 import {
   createContactMessage,
   getContactInfo,
@@ -17,6 +18,7 @@ import {
   getPublicProducts,
 } from "../controllers/product.controller.js";
 import {
+  chatbotMessageSchema,
   contactMessageSchema,
   createOrderSchema,
 } from "../utils/schemas.js";
@@ -31,5 +33,6 @@ publicRouter.get("/products/:slug", getPublicProductBySlug);
 publicRouter.get("/posts", getPublicPosts);
 publicRouter.get("/posts/:slug", getPublicPostBySlug);
 publicRouter.get("/contact-info", getContactInfo);
+publicRouter.post("/chatbot", validate(chatbotMessageSchema), createChatbotReply);
 publicRouter.post("/contact-messages", validate(contactMessageSchema), createContactMessage);
 publicRouter.post("/orders", validate(createOrderSchema), createOrder);

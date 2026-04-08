@@ -87,6 +87,7 @@ export const openApiDocument = {
     { name: "Public Categories", description: "Danh mục sản phẩm hiển thị cho người dùng cuối." },
     { name: "Public Products", description: "Danh sách sản phẩm, bộ lọc và trang chi tiết sản phẩm." },
     { name: "Public Posts", description: "Tin tức, bài viết, cảm hứng thiết kế nội thất." },
+    { name: "Public Chatbot", description: "Chatbot tư vấn sản phẩm và thông tin showroom." },
     { name: "Public Contact", description: "Thông tin liên hệ và form liên hệ từ phía người dùng." },
     { name: "Public Orders", description: "API đặt hàng từ website public." },
     { name: "Admin Auth", description: "Xác thực quản trị viên bằng JWT." },
@@ -559,7 +560,7 @@ export const openApiDocument = {
           zalo: {
             type: "string",
             nullable: true,
-            example: "https://zalo.me/0901234567",
+            example: "https://zalo.me/0968963562",
           },
           instagram: {
             type: "string",
@@ -610,7 +611,7 @@ export const openApiDocument = {
           zalo: {
             type: "string",
             nullable: true,
-            example: "https://zalo.me/0901234567",
+            example: "https://zalo.me/0968963562",
           },
           instagram: {
             type: "string",
@@ -639,7 +640,7 @@ export const openApiDocument = {
         properties: {
           id: { type: "string", example: contactMessageExampleId },
           name: { type: "string", example: "Nguyen Van A" },
-          phone: { type: "string", example: "0901234567" },
+          phone: { type: "string", example: "0968963562" },
           email: { type: "string", format: "email", example: "nguyenvana@gmail.com" },
           subject: { type: "string", example: "Tư vấn bộ bàn ăn 6 ghế" },
           message: {
@@ -664,7 +665,7 @@ export const openApiDocument = {
         type: "object",
         properties: {
           name: { type: "string", example: "Nguyen Van A" },
-          phone: { type: "string", example: "0901234567" },
+          phone: { type: "string", example: "0968963562" },
           email: { type: "string", format: "email", example: "nguyenvana@gmail.com" },
           subject: { type: "string", example: "Tư vấn bộ bàn ăn 6 ghế" },
           message: {
@@ -673,6 +674,49 @@ export const openApiDocument = {
           },
         },
         required: ["name", "phone", "email", "subject", "message"],
+      },
+      ChatbotHistoryTurn: {
+        type: "object",
+        properties: {
+          role: {
+            type: "string",
+            enum: ["assistant", "user"],
+            example: "user",
+          },
+          text: {
+            type: "string",
+            example: "Tôi cần một mẫu sofa hiện đại cho phòng khách nhỏ.",
+          },
+        },
+        required: ["role", "text"],
+      },
+      ChatbotRequest: {
+        type: "object",
+        properties: {
+          message: {
+            type: "string",
+            example: "Gợi ý cho tôi một mẫu sofa hiện đại, tone sáng.",
+          },
+          history: {
+            type: "array",
+            items: ref("ChatbotHistoryTurn"),
+          },
+        },
+        required: ["message"],
+      },
+      ChatbotReply: {
+        type: "object",
+        properties: {
+          text: {
+            type: "string",
+            example: "Bạn có thể tham khảo một vài mẫu sofa hiện đại, tone sáng đang phù hợp với nhu cầu này.",
+          },
+          products: {
+            type: "array",
+            items: ref("ProductSummary"),
+          },
+        },
+        required: ["text", "products"],
       },
       ContactMessageHandleInput: {
         type: "object",
@@ -697,7 +741,7 @@ export const openApiDocument = {
         type: "object",
         properties: {
           customerName: { type: "string", example: "Nguyen Van A" },
-          phone: { type: "string", example: "0901234567" },
+          phone: { type: "string", example: "0968963562" },
           email: { type: "string", format: "email", example: "nguyenvana@gmail.com" },
           address: { type: "string", example: "12 Nguyen Hue, District 1, Ho Chi Minh City" },
           note: {
@@ -749,7 +793,7 @@ export const openApiDocument = {
           id: { type: "string", example: orderExampleId },
           code: { type: "string", example: "LM240403123" },
           customerName: { type: "string", example: "Nguyen Van A" },
-          phone: { type: "string", example: "0901234567" },
+          phone: { type: "string", example: "0968963562" },
           email: { type: "string", format: "email", example: "nguyenvana@gmail.com" },
           address: { type: "string", example: "12 Nguyen Hue, District 1, Ho Chi Minh City" },
           note: {
@@ -1020,6 +1064,27 @@ export const openApiDocument = {
         description: "Dùng cho trang liên hệ, footer và floating contact action phía public.",
         responses: {
           200: successResponse("Thông tin liên hệ hiện tại.", ref("ContactInfo")),
+        },
+      },
+    },
+    "/api/chatbot": {
+      post: {
+        tags: ["Public Chatbot"],
+        summary: "Tạo phản hồi chatbot tư vấn",
+        description:
+          "Nhận câu hỏi và lịch sử hội thoại ngắn, sau đó trả về câu trả lời cùng danh sách sản phẩm gợi ý nếu có.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: ref("ChatbotRequest"),
+            },
+          },
+        },
+        responses: {
+          200: successResponse("Phản hồi chatbot thành công.", ref("ChatbotReply")),
+          400: errorResponse("Dữ liệu không hợp lệ.", 400, "Dữ liệu gửi lên không hợp lệ"),
+          502: errorResponse("Dịch vụ AI phản hồi lỗi.", 502, "Gemini đang từ chối yêu cầu chatbot"),
         },
       },
     },
