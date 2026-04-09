@@ -54,6 +54,7 @@ model Product {
   isNew            Boolean        @default(true)
   categoryId       String
   category         Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  embedding        ProductEmbedding?
   images           ProductImage[]
   orderItems       OrderItem[]
   createdAt        DateTime       @default(now())
@@ -62,6 +63,17 @@ model Product {
   @@index([categoryId])
   @@index([featured, bestSeller, isNew])
   @@index([createdAt])
+}
+
+model ProductEmbedding {
+  productId   String                 @id
+  product     Product                @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sourceText  String
+  embedding   Unsupported("vector")?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  @@index([updatedAt])
 }
 
 model ProductImage {

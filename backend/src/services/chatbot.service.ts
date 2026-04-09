@@ -2,7 +2,7 @@ import { env } from "../config/env.js";
 import { AppError } from "../utils/appError.js";
 import { categoryService } from "./category.service.js";
 import { contactService } from "./contact.service.js";
-import { productService } from "./product.service.js";
+import { productRetrievalService } from "./productRetrieval.service.js";
 
 type ChatbotHistoryTurn = {
   role: "assistant" | "user";
@@ -14,7 +14,7 @@ type ChatbotRequestPayload = {
   history?: ChatbotHistoryTurn[];
 };
 
-type ProductCandidate = Awaited<ReturnType<typeof productService.getPublicProducts>>["items"][number];
+type ProductCandidate = Awaited<ReturnType<typeof productRetrievalService.getChatbotCandidateProducts>>[number];
 
 type StructuredChatbotReply = {
   reply: string;
@@ -81,19 +81,6 @@ const normalizeHistory = (history: ChatbotHistoryTurn[] = []) =>
       text: item.text.trim().slice(0, 1200),
     }));
 
-const dedupeProducts = (products: ProductCandidate[]) => {
-  const seen = new Set<string>();
-
-  return products.filter((product) => {
-    if (seen.has(product.id)) {
-      return false;
-    }
-
-    seen.add(product.id);
-    return true;
-  });
-};
-
 const extractGeminiText = (payload: GeminiGenerateContentResponse) => {
   const parts = payload.candidates?.[0]?.content?.parts ?? [];
 
@@ -117,25 +104,7 @@ const getGeminiApiKey = () => {
 };
 
 const getCandidateProducts = async (message: string) => {
-  const [searchedProducts, featuredProducts] = await Promise.all([
-    productService
-      .getPublicProducts({
-        search: message,
-        limit: String(MAX_CANDIDATE_PRODUCTS),
-        sort: "featured",
-      })
-      .then((result) => result.items)
-      .catch(() => [] as ProductCandidate[]),
-    productService
-      .getPublicProducts({
-        limit: String(MAX_CANDIDATE_PRODUCTS),
-        sort: "featured",
-      })
-      .then((result) => result.items)
-      .catch(() => [] as ProductCandidate[]),
-  ]);
-
-  return dedupeProducts([...searchedProducts, ...featuredProducts]).slice(0, MAX_CANDIDATE_PRODUCTS);
+  return productRetrievalService.getChatbotCandidateProducts(message, MAX_CANDIDATE_PRODUCTS);
 };
 
 const buildStoreContext = async (message: string) => {

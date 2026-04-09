@@ -3,6 +3,7 @@ import { prisma } from "../config/prisma.js";
 import { AppError } from "../utils/appError.js";
 import { getPagination } from "../utils/pagination.js";
 import { slugify } from "../utils/slugify.js";
+import { productEmbeddingService } from "./productEmbedding.service.js";
 
 type ProductImageInput = {
   url: string;
@@ -29,7 +30,7 @@ type ProductPayload = {
   images: ProductImageInput[];
 };
 
-const productInclude = {
+export const productInclude = {
   category: true,
   images: {
     orderBy: {
@@ -52,6 +53,10 @@ const buildSort = (sort?: string): Prisma.ProductOrderByWithRelationInput[] => {
   }
 
   return [{ createdAt: "desc" }];
+};
+
+const logEmbeddingSyncError = (productId: string, error: unknown) => {
+  console.error(`[vector-search] sync failed for product ${productId}`, error);
 };
 
 export const productService = {
@@ -129,6 +134,23 @@ export const productService = {
         totalPages: Math.ceil(total / limit) || 1,
       },
     };
+  },
+
+  async getPublicProductsByIds(ids: string[]) {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: ids },
+      },
+      include: productInclude,
+    });
+
+    const productMap = new Map(products.map((product) => [product.id, product]));
+
+    return ids.map((id) => productMap.get(id)).filter((product): product is (typeof products)[number] => Boolean(product));
   },
 
   async getPublicProductBySlug(slug: string) {
@@ -216,7 +238,7 @@ export const productService = {
       throw new AppError("Danh mục không tồn tại", 400);
     }
 
-    return prisma.product.create({
+    const product = await prisma.product.create({
       data: {
         name: payload.name,
         slug: slugify(payload.slug ?? payload.name),
@@ -243,6 +265,10 @@ export const productService = {
       },
       include: productInclude,
     });
+
+    await productEmbeddingService.syncProductEmbedding(product.id).catch((error) => logEmbeddingSyncError(product.id, error));
+
+    return product;
   },
 
   async updateProduct(id: string, payload: ProductPayload) {
@@ -265,7 +291,7 @@ export const productService = {
       throw new AppError("Danh mục không tồn tại", 400);
     }
 
-    return prisma.product.update({
+    const product = await prisma.product.update({
       where: { id },
       data: {
         name: payload.name,
@@ -294,6 +320,10 @@ export const productService = {
       },
       include: productInclude,
     });
+
+    await productEmbeddingService.syncProductEmbedding(product.id).catch((error) => logEmbeddingSyncError(product.id, error));
+
+    return product;
   },
 
   async deleteProduct(id: string) {
