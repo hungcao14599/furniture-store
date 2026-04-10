@@ -127,10 +127,12 @@ cd /var/www/app/furniture-store
 Cai dependency cho ca backend va frontend:
 
 ```bash
-npm ci
+npm ci --include=dev
 ```
 
-Vi repo dang dung `workspaces`, `npm ci` o root se cai package cho ca `backend` va `frontend`.
+Vi repo dang dung `workspaces`, `npm ci --include=dev` o root se cai package cho ca `backend` va `frontend`, bao gom ca `devDependencies` can thiet cho buoc build nhu `typescript`, `tsx`, `prisma`.
+
+Neu shell tren VPS dang dat san `NODE_ENV=production` hoac `NPM_CONFIG_PRODUCTION=true`, `npm ci` thuong se bo qua `devDependencies`, dan den loi kieu `sh: 1: tsc: not found`.
 
 ## 5. Cau hinh backend
 
@@ -345,7 +347,7 @@ sudo chown -R $USER:$USER /var/www/app/furniture-store
 git clone <repo-url> /var/www/app/furniture-store
 cd /var/www/app/furniture-store
 
-npm ci
+npm ci --include=dev
 cp backend/.env.production.example backend/.env
 cp frontend/.env.production.example frontend/.env.production
 
@@ -375,7 +377,7 @@ Moi lan update code:
 ```bash
 cd /var/www/app/furniture-store
 git pull
-npm ci
+npm ci --include=dev
 npm run prisma:generate --workspace backend
 npm run prisma:migrate:deploy --workspace backend
 npm run build
@@ -394,4 +396,5 @@ Neu lan update do khong co migration moi, co the bo qua `npm run prisma:migrate:
 - Upload hien tai dung `multer.memoryStorage()` va day file thang len Supabase Storage, khong can luu local tren VPS.
 - Neu toan bo anh deu o Supabase thi khong can tao `backend/uploads`.
 - `npm run prisma:migrate` khong dung cho production. Tren VPS hay dung `npm run prisma:migrate:deploy --workspace backend`.
+- Neu build bi loi `tsc: not found` hoac `tsx: not found`, hay cai lai bang `npm ci --include=dev` va kiem tra shell khong ep `omit=dev`.
 - Neu deploy tren Google Cloud ma truy cap bang IP khong vao duoc, thu kiem tra firewall rule `tcp:3110` truoc khi debug Nginx hay Node.js.
